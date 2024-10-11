@@ -37,23 +37,28 @@ if __name__ == "__main__":
 
     # Get the required information
     server_ip = os.popen("hostname -I | awk '{print $1}'").read().strip()  # Get server's IP
-    client_ip = os.environ.get("PAM_RHOST", "unknown")  # Get client's IP from PAM
-    username = os.environ.get("PAM_USER", "unknown")  # Get the username from PAM
+
+    # Extract client IP from SSH_CONNECTION variable
+    ssh_connection = os.environ.get("SSH_CONNECTION", "")
+    if ssh_connection:
+        client_ip = ssh_connection.split()[0]  # The first field is the client IP
+    else:
+        client_ip = "unknown"  # Default to unknown if SSH_CONNECTION is not set
+
+    # Extract username from the environment variable 'USER'
+    username = os.environ.get("USER", "unknown")  # Get the username from USER environment variable
+    if username == "unknown":
+        logging.warning("Username is unknown. USER variable not set correctly.")
+
     login_time = datetime.now().isoformat()  # Get current datetime in ISO format
 
     logging.debug(f'Received data - Server IP: {server_ip}, Client IP: {client_ip}, Username: {username}, Login Time: {login_time}')
 
-    # Determine if the login is successful or not
-    # PAM's exit code: 0 = success, anything else = failure
-    if os.environ.get("PAM_SUCCESS", "0") == "1":
-        success = True
-        exit_code = 0
-    else:
-        success = False
-        exit_code = 1
+    # Assume the login is successful for this example
+    success = True  # Update this based on your PAM logic
 
     # Send data to the API
-    send_login_data(server_ip, client_ip, login_time, username, success)
+    exit_code = send_login_data(server_ip, client_ip, login_time, username, success)
 
     # Exit with appropriate code
     sys.exit(exit_code)
