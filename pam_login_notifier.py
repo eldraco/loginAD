@@ -9,7 +9,7 @@ import syslog
 syslog.openlog("pam_login_notifier", facility=syslog.LOG_LOCAL7)
 
 def send_login_data(server_ip, client_ip, login_time, username, success, connection_type):
-    api_url = "http://localhost:5010/login"  # Adjust the URL as needed
+    api_url = "http://147.32.80.37:5010/login"  # Adjust the URL as needed
     data = {
         "server_ip": server_ip,
         "client_ip": client_ip,
