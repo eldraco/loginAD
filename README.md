@@ -7,6 +7,16 @@ A particular thing to notice is that logins with password are managed by PAM, bu
 
 # Usage and installation
 
+# Clone this program into the computer that will receive the logs, and the computer you want to monitor.
+
+# Copy the script
+
+In the computer you want to monitor, as root copy the script `pam_login_notifier.py` to `/usr/sbin/`.
+
+# Modify the permisions of the script
+
+`chmod 774 /usr/sbin/pam_login_notifier.py`
+
 # Start the loginAD server
 
 In the computer that will receive the logins logs, do:
@@ -53,9 +63,10 @@ Modify PAM to send the logs of the password logins
 Edit /etc/pam.d/sshd
 
 ```
-auth optional pam_exec.so /usr/sbin/pam_login_notifier.py
 auth required pam_unix.so nullok
+auth optional pam_exec.so /usr/sbin/pam_login_notifier.py
 auth include common-auth
+session optional pam_exec.so /usr/sbin/pam_login_notifier.py
 ```
 
 ## 4. Restart SSH
