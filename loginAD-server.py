@@ -21,7 +21,8 @@ def init_db(db_name):
             server_ip TEXT NOT NULL,
             client_ip TEXT NOT NULL,
             login_time TEXT NOT NULL,
-            username TEXT NOT NULL
+            username TEXT NOT NULL,
+            success INTEGER NOT NULL  -- New column for success status
         )
     ''')
     conn.commit()
@@ -36,18 +37,19 @@ def login():
         client_ip = data['client_ip']
         login_time = data['login_time']
         username = data['username']
+        success = data['success']  # Retrieve the success status
 
         # Store the data in the SQLite database
         conn = sqlite3.connect('logins.db')
         c = conn.cursor()
         c.execute('''
-            INSERT INTO logins (server_ip, client_ip, login_time, username)
-            VALUES (?, ?, ?, ?)
-        ''', (server_ip, client_ip, login_time, username))
+            INSERT INTO logins (server_ip, client_ip, login_time, username, success)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (server_ip, client_ip, login_time, username, int(success)))  # Convert success to integer
         conn.commit()
         conn.close()
 
-        logging.info(f'Login recorded: {server_ip}, {client_ip}, {login_time}, {username}')
+        logging.info(f'Login recorded: {server_ip}, {client_ip}, {login_time}, {username}, Success: {success}')
         return jsonify({'status': 'success', 'message': 'Login recorded.'}), 201
 
     except Exception as e:
@@ -57,7 +59,7 @@ def login():
 # Main function to run the server
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Login Anomaly Detection API')
-    parser.add_argument('--port', type=int, default=5000, help='Port to run the server on')
+    parser.add_argument('--port', type=int, default=5010, help='Port to run the server on')
     args = parser.parse_args()
 
     # Initialize the database
@@ -65,3 +67,4 @@ if __name__ == '__main__':
 
     # Run the Flask app
     app.run(host='0.0.0.0', port=args.port)
+
